@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 df = pd.read_csv('kdd-file.csv')
 
@@ -20,3 +21,16 @@ column_names = [
 df.columns = column_names
 
 df = pd.get_dummies(df, columns=['protocol_type', 'service', 'flag'])
+
+# Create a MinMaxScaler object
+scaler = MinMaxScaler()
+
+# Normalize numerical columns in chunks (excluding the target column)
+chunk_size = 20
+columns = df.select_dtypes(include=['float64', 'int64']).columns
+
+for i in range(0, len(columns), chunk_size):
+	chunk = columns[i:i + chunk_size]
+	df[chunk] = scaler.fit_transform(df[chunk])
+
+print("Normalization complete.")
