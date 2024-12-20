@@ -19,4 +19,4 @@ column_names = [
 
 df.columns = column_names
 
-print(df.columns)
+df = pd.get_dummies(df, columns=['protocol_type', 'service', 'flag'])
