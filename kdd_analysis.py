@@ -1,8 +1,12 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+
 
 df = pd.read_csv('kdd-file.csv')
+df = df.sample(frac=0.1, random_state=42) # Use only 10% of the data
 
 column_names = [
     "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes",
@@ -42,3 +46,14 @@ y = df['label']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 print(f"Training size: {X_train.shape}, Testing size: {X_test.shape}")
+
+# Initialize and train model
+
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate on test data
+
+y_pred = model.predict(X_test)
+print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+print(classification_report(y_test, y_pred))
