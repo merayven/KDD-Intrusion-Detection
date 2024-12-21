@@ -1,11 +1,21 @@
 import pandas as pd
+import boto3
+from io import StringIO
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
+bucket_name = 'ids-nettraff-dataset'
+csv_key = 'kddcup.data_10_percent_corrected'
 
-df = pd.read_csv('kdd-file.csv')
+s3 = boto3.client('s3')
+
+response = s3.get_object(Bucket=bucket_name, Key=csv_key)
+
+csv_content = response['Body'].read().decode('utf-8')
+df = pd.read_csv(StringIO(csv_content))
+
 df = df.sample(frac=0.1, random_state=42) # Use only 10% of the data
 
 column_names = [
