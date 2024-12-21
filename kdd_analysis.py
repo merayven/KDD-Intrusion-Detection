@@ -1,6 +1,7 @@
 import pandas as pd
 import boto3
 from io import StringIO
+from imblearn.over_sampling import BorderlineSMOTE
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -55,12 +56,29 @@ y = df['label']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+# Define a minimum threshold
+min_samples = 3  # Adjust this as needed
+valid_classes = y_train.value_counts()[y_train.value_counts() >= min_samples].index
+
+# Filter classes
+X_train_filtered = X_train[y_train.isin(valid_classes)]
+y_train_filtered = y_train[y_train.isin(valid_classes)]
+
+# Apply SMOTE to the training data
+smote = BorderlineSMOTE(random_state=42, k_neighbors=2)
+X_train_resampled, y_train_resampled = smote.fit_resample(X_train_filtered, y_train_filtered)
+
 print(f"Training size: {X_train.shape}, Testing size: {X_test.shape}")
+
+print("Before SMOTE:")
+print(y_train.value_counts())
+print("\nAfter SMOTE:")
+print(pd.Series(y_train_resampled).value_counts())
 
 # Initialize and train model
 
 model = RandomForestClassifier(random_state=42)
-model.fit(X_train, y_train)
+model.fit(X_train_resampled, y_train_resampled)
 
 # Evaluate on test data
 
